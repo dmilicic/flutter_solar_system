@@ -3,121 +3,85 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../models/planet_data.dart';
+import '../providers/space_painter_provider.dart';
+
 class SpacePainter extends CustomPainter {
 
-  SpacePainter();
+  final SpacePainterProvider provider;
 
-  final int starCount = 300;
-  final _random = Random();
-
-  final _paint = Paint()
-    ..color = const Color(0xFF000000)
-    ..style = PaintingStyle.fill;
-
-  final _distantStarPaint = Paint()
-    ..color = const Color(0xFFFFFFFF)
-    ..style = PaintingStyle.fill;
-
-  final _sunPaint = Paint()
-    ..color = const Color(0xFFfee66f)
-    ..style = PaintingStyle.fill;
-
-  final _orbitalPathPaint = Paint()
-    ..color = const Color(0xFFaabdd6)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 2.0;
-
-  final sunRayPaint = Paint()
-    ..color = const Color(0xFFfee66f)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 2.0;
-
-  final _planetPaint = Paint()
-    ..color = const Color(0xFF00FF00) // color of the planet
-    ..style = PaintingStyle.fill;
+  SpacePainter(this.provider);
 
   final sunRayLength = 100.0;
-  final orbitRadius1 = 400.0;
-
   final starRadius = 1.5;
   final sunRadius = 50.0;
-
-  var planetRadius = 50.0; // radius of the planet
-  double planetAngle = 0.0; // angle of the planet on the orbital path in radians
-
 
   @override
   void paint(Canvas canvas, Size size) {
 
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.drawRect(rect, _paint);
+    final backgroundRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawRect(backgroundRect, provider.provideSpacePaint());
 
-    for (var i = 0; i < starCount; i++) {
-      final starPosition = Offset(
-        _random.nextDouble() * size.width,
-        _random.nextDouble() * size.height,
-      );
-      canvas.drawCircle(starPosition, starRadius, _distantStarPaint);
-    }
+    provider.provideStars().forEach((starPosition) {
+      final position = starPosition * size.width;
+      canvas.drawCircle(position, starRadius, provider.provideStarPaint());
+    });
 
     drawSun(canvas, size);
-    drawOrbit(canvas, size);
-    drawPlanet(canvas, size);
+
+    for (var planet in planets) {
+      drawOrbit(canvas, size, orbitRadius: planet.distance);
+      drawPlanet(canvas, size, planet);
+    }
   }
 
-  void drawPlanet(Canvas canvas, Size size) {
+  void drawPlanet(Canvas canvas, Size size, PlanetData planet) {
     final sunPosition = Offset(
       size.width / 2,
       size.height / 2,
     );
 
+    final planetPaint = provider.planetPainter..color = planet.color;
+    final planetAngle = planet.angle;
+
     // Calculate the position of the planet on the orbital path
     final planetPosition = Offset(
-      sunPosition.dx + orbitRadius1 * cos(planetAngle),
-      sunPosition.dy + orbitRadius1 * sin(planetAngle),
-    );
-
-    // Calculate the relative position of the planet to the sun
-    final relativePosition = planetPosition - sunPosition;
-    final normalizedPosition = Alignment(
-      2 * (relativePosition.dx / size.width) - 1,
-      2 * (relativePosition.dy / size.height) - 1,
+      sunPosition.dx + planet.distance * cos(planetAngle),
+      sunPosition.dy + planet.distance * sin(planetAngle),
     );
 
     final alignment = Alignment(
-      cos(planetAngle) * orbitRadius1 / (size.width / 2) * -1,
-      sin(planetAngle) * orbitRadius1 / (size.height / 2) * -1,
+      cos(planetAngle) * planet.distance / (size.width / 2) * -1,
+      sin(planetAngle) * planet.distance / (size.height / 2) * -1,
     );
-
-    print(relativePosition);
-    print(normalizedPosition);
 
     // Define the gradient
     final gradient = RadialGradient(
-      // center: Alignment(-0.5, 0.15),
       center: alignment,
       radius: 0.5, // covers the full circle
-      colors: const <Color>[
-        Color(0xFFbbcd96), // inner color
-        Color(0xFF5b7c65), // outer color
+      colors: <Color>[
+        // Color(0xFFbbcd96), // inner color
+        // Color(0xFF5b7c65), // outer color
+        planet.color,
+        darken(planet.color),
       ],
-      stops: <double>[0.0, 1.0], // defines the position of the colors
+      stops: const <double>[0.0, 1.0], // defines the position of the colors
     );
 
     // Create a Rect that represents the bounds of the circle
-    final rect = Rect.fromCircle(center: planetPosition, radius: planetRadius);
+    final rect = Rect.fromCircle(center: planetPosition, radius: planet.radius);
 
     // Create the Shader from the gradient and the bounding square
     final shader = gradient.createShader(rect);
 
     // Set the Shader to the Paint
-    _planetPaint.shader = shader;
+    planetPaint.shader = shader;
 
     // Draw the planet
-    canvas.drawCircle(planetPosition, planetRadius, _planetPaint);
+    canvas.drawCircle(planetPosition, planet.radius, planetPaint);
 
     // Update the angle for the next frame
-    planetAngle += 0.01; // adjust this value to change the speed of the planet
+    planet.angle += 0.001; // adjust this value to change the speed of the planet
   }
 
   void drawOrbit(Canvas canvas, Size size, {double orbitRadius = 400.0}) {
@@ -127,7 +91,7 @@ class SpacePainter extends CustomPainter {
     );
     final orbitalPath = Path();
     orbitalPath.addOval(Rect.fromCircle(center: sunPosition, radius: orbitRadius));
-    canvas.drawPath(orbitalPath, _orbitalPathPaint);
+    canvas.drawPath(orbitalPath, provider.provideOrbitalPathPaint());
   }
 
   void drawSun(Canvas canvas, Size size) {
@@ -135,12 +99,35 @@ class SpacePainter extends CustomPainter {
       size.width / 2,
       size.height / 2,
     );
-    canvas.drawCircle(sunPosition, sunRadius, _sunPaint);
-    drawSunRays(canvas, sunPosition, size);
+
+    final sunPaint = provider.provideSunPaint();
+
+    const gradient = RadialGradient(
+      center: Alignment(0.0, 0.0),
+      radius: 0.5, // covers the full circle
+      colors: <Color>[
+        Color(0xFFfee66f),
+        Color(0xFFf69600),
+      ],
+      stops: <double>[0.0, 1.0], // defines the position of the colors
+    );
+
+    // Create a Rect that represents the bounds of the circle
+    final rect = Rect.fromCircle(center: sunPosition, radius: sunRadius);
+
+    // Create the Shader from the gradient and the bounding square
+    final shader = gradient.createShader(rect);
+
+    // Set the Shader to the Paint
+    sunPaint.shader = shader;
+
+    canvas.drawCircle(sunPosition, sunRadius, sunPaint);
   }
 
   void drawSunRays(Canvas canvas, Offset sunPosition, Size size) {
+    final sunRayPaint = provider.provideSunRayPaint();
     final sunRayPath = Path();
+
     sunRayPath.moveTo(sunPosition.dx, sunPosition.dy);
     sunRayPath.lineTo(sunPosition.dx + sunRayLength, sunPosition.dy);
     sunRayPath.moveTo(sunPosition.dx, sunPosition.dy);
@@ -161,5 +148,12 @@ class SpacePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+
+  Color darken(Color color, [double amount = .5]) {
+    final hsl = HSLColor.fromColor(color);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+
+    return hslDark.toColor();
+  }
 }
