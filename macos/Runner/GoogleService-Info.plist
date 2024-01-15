@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyD95d88pr93KPsWn8rkAac31pqs4iWtsPI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1072675133464</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.dmilicic.solarsystem.solarSystem.RunnerTests</string>
+	<key>PROJECT_ID</key>
+	<string>fluttersolarsystem</string>
+	<key>STORAGE_BUCKET</key>
+	<string>fluttersolarsystem.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1072675133464:ios:9e9abaaceb7b4048d40b6d</string>
+</dict>
+</plist>

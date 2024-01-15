@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../models/planet_data.dart';
-import '../providers/space_painter_provider.dart';
+import '../../models/planet_data.dart';
+import '../../providers/space_painter_provider.dart';
 
 class SpacePainter extends CustomPainter {
 
@@ -14,7 +14,7 @@ class SpacePainter extends CustomPainter {
 
   final sunRayLength = 100.0;
   final starRadius = 1.5;
-  final sunRadius = 50.0;
+  final sunRadius = 100.0;
 
   @override
   void paint(Canvas canvas, Size size) {

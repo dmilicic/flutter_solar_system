@@ -1,9 +1,12 @@
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:solar_system/painters/space_painter.dart';
-import 'package:solar_system/painters/spaceship_painter.dart';
+import 'package:solar_system/network/spaceship_network_operations.dart';
 import 'package:solar_system/providers/space_painter_provider.dart';
+import 'package:solar_system/ui/painters/space_painter.dart';
+import 'package:solar_system/ui/painters/spaceship_painter.dart';
+
+import '../models/spaceship_data.dart';
 
 class SolarSystem extends StatefulWidget {
   const SolarSystem({super.key});
@@ -15,14 +18,18 @@ class SolarSystem extends StatefulWidget {
 class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStateMixin {
 
   final dataProvider = SpacePainterProvider();
+  final networkOperations = SpaceshipNetworkOperations();
+
   late final Ticker _ticker;
 
   final TransformationController _controller = TransformationController();
   final FocusNode _focusNode = FocusNode();
   final Set<LogicalKeyboardKey> _currentKeysPressed = {};
 
-  double spaceshipX = 0.0;
-  double spaceshipY = 0.0;
+  double spaceshipX = 1000.0;
+  double spaceshipY = 500.0;
+
+  double _elapsed = 0.0;
 
   @override
   void initState() {
@@ -46,9 +53,18 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
           spaceshipX += 10.0;
         }
       }
+
+      // show a new spaceship every second
+      final elapsedSeconds = elapsed.inSeconds.toDouble();
+      if(elapsedSeconds - _elapsed > 1.0) {
+        _elapsed = elapsedSeconds;
+
+      }
     });
 
     _ticker.start();
+
+    networkOperations.fetchSpaceshipData();
   }
 
   @override
@@ -81,6 +97,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             ),
           ),
 
+          // player spaceship
           Positioned(
             left: spaceshipX,
             top: spaceshipY,
@@ -89,7 +106,24 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             ),
           ),
 
-          // Image.asset("sun.gif", width: 100, height: 100, fit: BoxFit.cover),
+          // other spaceships
+          StreamBuilder(
+            stream: networkOperations.spaceshipStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final spaceshipData = snapshot.data as SpaceshipData;
+                return Positioned(
+                  left: spaceshipData.locationX,
+                  top: spaceshipData.locationY,
+                  child: CustomPaint(
+                    painter: SpaceshipPainter(),
+                  ),
+                );
+              } else {
+                return Container();
+              }
+            },
+          ),
         ]),
       ),
     );
