@@ -50,7 +50,8 @@ class DefaultFirebaseOptions {
     projectId: 'fluttersolarsystem',
     authDomain: 'fluttersolarsystem.firebaseapp.com',
     storageBucket: 'fluttersolarsystem.appspot.com',
-    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app.firebaseio.com'
+    // databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app.firebaseio.com'
+    databaseURL: 'http://127.0.0.1:9000'
   );
 
   static const FirebaseOptions android = FirebaseOptions(

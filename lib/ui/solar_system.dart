@@ -77,21 +77,15 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
         }
       }
 
-      // send the updates every 50 milliseconds
+      // send the updates after a short period of time
       final elapsedMillis = elapsed.inMilliseconds.toDouble();
-      if(elapsedMillis - _elapsed > 50) {
+      if(elapsedMillis - _elapsed > 10) {
         _elapsed = elapsedMillis;
-
-        // update the new positions
-        if (_currentKeysPressed.isNotEmpty) {
-          // repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
-        }
+        repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
       }
     });
 
     _ticker.start();
-
-    // networkOperations.fetchSpaceshipData();
 
     repository.registerNewSpaceship();
   }
@@ -139,8 +133,6 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final spaceshipData = snapshot.data as List<SpaceshipData>;
-
-                // print('spaceshipData: ${spaceshipData.length}');
 
                 var spaceshipWidgets = <Widget>[];
                 for (var ship in spaceshipData) {

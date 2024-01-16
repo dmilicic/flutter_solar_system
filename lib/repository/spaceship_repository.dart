@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:solar_system/repository/spaceship_repository_interface.dart';
 import 'package:uuid/uuid.dart';
@@ -19,11 +17,6 @@ class SpaceshipRepository implements ISpaceshipRepository {
 
   Future<void> registerNewSpaceship() async {
 
-    // final snapshot = await FirebaseDatabase.instance.ref("spaceships").get();
-    // if (!snapshot.exists) {
-    //   FirebaseDatabase.instance.ref("spaceships").set({});
-    // }
-
     final id = uuid.v4();
     playerSpaceship = SpaceshipData(
       id: id,
@@ -35,7 +28,8 @@ class SpaceshipRepository implements ISpaceshipRepository {
     await updateSpaceshipData(playerSpaceship);
 
     // populate our local map
-    _updateSpaceships();
+    final snapshot = await _db.ref("spaceships").get();
+    _updateSpaceships(snapshot);
   }
 
   Future<void> updateSpaceshipData(SpaceshipData spaceshipData) async {
@@ -54,12 +48,9 @@ class SpaceshipRepository implements ISpaceshipRepository {
 
   @override
   Stream<List<SpaceshipData>> observeSpaceships() {
-    return _db.ref('spaceships').onChildChanged.map((event) {
-
-      print(event.snapshot.value);
-
-      _updateSpaceship(event.snapshot as Map<String, dynamic>);
-
+    return _db.ref('spaceships').onValue.map((event) {
+      print('spaceship added: ${event.snapshot.value}');
+      _updateSpaceships(event.snapshot);
       return spaceships.values.toList();
     });
   }
@@ -75,8 +66,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
     }
   }
 
-  void _updateSpaceships() async {
-    final snapshot = await FirebaseDatabase.instance.ref("spaceships").get();
+  void _updateSpaceships(DataSnapshot snapshot) async {
     for (var doc in snapshot.children) {
       _updateSpaceship(doc.value as Map<String, dynamic>);
     }
