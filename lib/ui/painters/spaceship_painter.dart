@@ -1,11 +1,19 @@
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 
 class SpaceshipPainter extends CustomPainter {
 
+  late Color color;
+
+  SpaceshipPainter({required this.color});
+
+
   @override
   void paint(Canvas canvas, Size size) {
+
     final paint = Paint()
-      ..color = const Color(0xFFff834b)
+      ..color = color
       ..style = PaintingStyle.fill;
 
     final path = Path()

@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:solar_system/network/spaceship_network_operations.dart';
 import 'package:solar_system/providers/space_painter_provider.dart';
+import 'package:solar_system/repository/spaceship_repository.dart';
 import 'package:solar_system/ui/painters/space_painter.dart';
 import 'package:solar_system/ui/painters/spaceship_painter.dart';
 
@@ -19,6 +22,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
   final dataProvider = SpacePainterProvider();
   final networkOperations = SpaceshipNetworkOperations();
+  final repository = SpaceshipRepository();
 
   late final Ticker _ticker;
 
@@ -26,10 +30,29 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   final FocusNode _focusNode = FocusNode();
   final Set<LogicalKeyboardKey> _currentKeysPressed = {};
 
+  final spaceWidth = 2000.0;
+  final spaceHeight = 2000.0;
+
   double spaceshipX = 1000.0;
   double spaceshipY = 500.0;
 
   double _elapsed = 0.0;
+
+  final colors = <Color>[
+    const Color(0xFFff834b),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+    getRandomColor(),
+  ];
 
   @override
   void initState() {
@@ -54,23 +77,27 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
         }
       }
 
-      // show a new spaceship every second
-      final elapsedSeconds = elapsed.inSeconds.toDouble();
-      if(elapsedSeconds - _elapsed > 1.0) {
-        _elapsed = elapsedSeconds;
+      // send the updates every 50 milliseconds
+      final elapsedMillis = elapsed.inMilliseconds.toDouble();
+      if(elapsedMillis - _elapsed > 50) {
+        _elapsed = elapsedMillis;
 
+        // update the new positions
+        if (_currentKeysPressed.isNotEmpty) {
+          // repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
+        }
       }
     });
 
     _ticker.start();
 
-    networkOperations.fetchSpaceshipData();
+    // networkOperations.fetchSpaceshipData();
+
+    repository.registerNewSpaceship();
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
 
     return RawKeyboardListener(
       focusNode: _focusNode,
@@ -89,9 +116,9 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
         maxScale: 10,
         minScale: 0.01,
         child: Stack(children: [
-          Container(
-            width: 2000,
-            height: 2000,
+          SizedBox(
+            width: spaceWidth,
+            height: spaceHeight,
             child: CustomPaint(
               painter: SpacePainter(dataProvider),
             ),
@@ -102,23 +129,41 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             left: spaceshipX,
             top: spaceshipY,
             child: CustomPaint(
-              painter: SpaceshipPainter(),
+              painter: SpaceshipPainter(color: colors[0]),
             ),
           ),
 
           // other spaceships
           StreamBuilder(
-            stream: networkOperations.spaceshipStream,
+            stream: repository.observeSpaceships(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                final spaceshipData = snapshot.data as SpaceshipData;
-                return Positioned(
-                  left: spaceshipData.locationX,
-                  top: spaceshipData.locationY,
-                  child: CustomPaint(
-                    painter: SpaceshipPainter(),
-                  ),
-                );
+                final spaceshipData = snapshot.data as List<SpaceshipData>;
+
+                // print('spaceshipData: ${spaceshipData.length}');
+
+                var spaceshipWidgets = <Widget>[];
+                for (var ship in spaceshipData) {
+
+                  final idx = spaceshipData.indexOf(ship);
+
+                  spaceshipWidgets.add(Positioned(
+                    left: ship.locationX,
+                    top: ship.locationY,
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CustomPaint(
+                        painter: SpaceshipPainter(color: colors[idx % colors.length]),
+                      ),
+                    ),
+                  ));
+                }
+
+                return SizedBox(
+                    width: spaceWidth,
+                    height: spaceHeight,
+                    child: Stack(children: spaceshipWidgets));
               } else {
                 return Container();
               }
@@ -134,4 +179,14 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
     _ticker.dispose();
     super.dispose();
   }
+}
+
+Color getRandomColor() {
+  Random random = Random();
+  return Color.fromRGBO(
+    random.nextInt(256), // Red
+    random.nextInt(256), // Green
+    random.nextInt(256), // Blue
+    1, // Alpha
+  );
 }

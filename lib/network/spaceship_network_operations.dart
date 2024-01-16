@@ -1,58 +1,49 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
-
-import 'package:flutter/material.dart';
 
 import '../models/spaceship_data.dart';
 
 class SpaceshipNetworkOperations {
 
-  final _spaceshipStreamController = StreamController<SpaceshipData>();
+  final _spaceshipStreamController = StreamController<List<SpaceshipData>>();
 
-  Stream<SpaceshipData> get spaceshipStream => _spaceshipStreamController.stream;
+  Stream<List<SpaceshipData>> get spaceshipStream => _spaceshipStreamController.stream;
 
   final random = Random();
 
   void fetchSpaceshipData() {
     // Fetch the data from network or any other source
     // For now, let's use a dummy SpaceshipData
-    SpaceshipData spaceshipData = SpaceshipData(
-      id: '1',
-      name: 'Spaceship 1',
-      locationX: 200.0,
-      locationY: 200.0,
-    );
 
-    var oldSpaceshipData = spaceshipData;
+    var spaceships = <SpaceshipData>[];
+    for(var i = 0; i < 100; i++) {
+      spaceships.add(SpaceshipData(
+        id: i.toString(),
+        name: 'Spaceship $i',
+        locationX: 2000 * random.nextDouble(),
+        locationY: 2000 * random.nextDouble(),
+      ));
+    }
 
     Future.doWhile(() async {
-      final movedSpaceship = SpaceshipData(
-        id: spaceshipData.id,
-        name: spaceshipData.name,
-        locationX: oldSpaceshipData.locationX + 10.0 * random.nextDouble(),
-        locationY: oldSpaceshipData.locationY + 10.0 * random.nextDouble(),
-      );
 
-      print("Spaceship: ${movedSpaceship.locationX}, ${movedSpaceship.locationY}");
+      // update all spaceship movements
+      for(var i = 0; i < spaceships.length; i++) {
+        spaceships[i] = SpaceshipData(
+          id: i.toString(),
+          name: 'Spaceship $i',
+          locationX: spaceships[i].locationX + 5.0 * random.nextDouble() * (random.nextBool() ? 1 : -1),
+          locationY: spaceships[i].locationY + 5.0 * random.nextDouble() * (random.nextBool() ? 1 : -1),
+        );
+      }
 
-      await Future.delayed(const Duration(milliseconds: 16));
+      await Future.delayed(const Duration(milliseconds: 50));
 
-      oldSpaceshipData = movedSpaceship;
-
-      _spaceshipStreamController.sink.add(movedSpaceship);
+      _spaceshipStreamController.sink.add(spaceships);
 
       return true;
     });
 
-  }
-
-  void observeSpaceshipData(void Function(SpaceshipData event) onData) {
-    spaceshipStream.listen((SpaceshipData data) {
-      // We have new spaceship data
-      print('Spaceship Name: ${data.name}');
-      onData(data);
-    });
   }
 
   void dispose() {

@@ -50,6 +50,7 @@ class DefaultFirebaseOptions {
     projectId: 'fluttersolarsystem',
     authDomain: 'fluttersolarsystem.firebaseapp.com',
     storageBucket: 'fluttersolarsystem.appspot.com',
+    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app.firebaseio.com'
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -58,6 +59,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1072675133464',
     projectId: 'fluttersolarsystem',
     storageBucket: 'fluttersolarsystem.appspot.com',
+    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app.firebaseio.com'
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -76,5 +78,6 @@ class DefaultFirebaseOptions {
     projectId: 'fluttersolarsystem',
     storageBucket: 'fluttersolarsystem.appspot.com',
     iosBundleId: 'com.dmilicic.solarsystem.solarSystem.RunnerTests',
+    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app.firebaseio.com'
   );
 }
