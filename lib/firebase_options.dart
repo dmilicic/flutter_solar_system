@@ -2,7 +2,7 @@
 // ignore_for_file: lines_longer_than_80_chars, avoid_classes_with_only_static_members
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+    show TargetPlatform, defaultTargetPlatform, kDebugMode, kIsWeb;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -17,7 +17,11 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      if (kDebugMode) {
+        return webDebug;
+      } else {
+        return web;
+      }
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -50,8 +54,17 @@ class DefaultFirebaseOptions {
     projectId: 'fluttersolarsystem',
     authDomain: 'fluttersolarsystem.firebaseapp.com',
     storageBucket: 'fluttersolarsystem.appspot.com',
-    // databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app.firebaseio.com'
-    databaseURL: 'http://127.0.0.1:9000'
+    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app'
+  );
+
+  static const FirebaseOptions webDebug = FirebaseOptions(
+      apiKey: 'AIzaSyC_KA6vsQgeITS7RHC4cZ2HGq38tH01Ldw',
+      appId: '1:1072675133464:web:028c4265fd0cb512d40b6d',
+      messagingSenderId: '1072675133464',
+      projectId: 'fluttersolarsystem',
+      authDomain: 'fluttersolarsystem.firebaseapp.com',
+      storageBucket: 'fluttersolarsystem.appspot.com',
+      databaseURL: 'http://127.0.0.1:9000'
   );
 
   static const FirebaseOptions android = FirebaseOptions(
