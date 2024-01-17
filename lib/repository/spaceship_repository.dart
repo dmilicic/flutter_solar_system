@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:solar_system/repository/spaceship_repository_interface.dart';
 import 'package:uuid/uuid.dart';
 
@@ -39,17 +40,23 @@ class SpaceshipRepository implements ISpaceshipRepository {
       'name': spaceshipData.name,
       'locationX': spaceshipData.locationX,
       'locationY': spaceshipData.locationY,
-    }).onError((error, stackTrace) =>
-        print('Failed to update spaceship data: $error')
-    ).timeout(Duration(seconds: 5), onTimeout: () {
-      print('Failed to update spaceship data: timeout');
+    }).onError((error, stackTrace) {
+      if (kDebugMode) {
+        print('Failed to update spaceship data: $error');
+      }
+    }).timeout(const Duration(seconds: 5), onTimeout: () {
+      if (kDebugMode) {
+        print('Failed to update spaceship data: timeout');
+      }
     });
   }
 
   @override
   Stream<List<SpaceshipData>> observeSpaceships() {
     return _db.ref('spaceships').onValue.map((event) {
-      print('spaceship added: ${event.snapshot.value}');
+      if (kDebugMode) {
+        print('spaceship added: ${event.snapshot.value}');
+      }
       _updateSpaceships(event.snapshot);
       return spaceships.values.toList();
     });
