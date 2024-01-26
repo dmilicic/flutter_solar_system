@@ -22,6 +22,7 @@ class SpaceshipNetworkOperations {
         name: 'Spaceship $i',
         locationX: 2000 * random.nextDouble(),
         locationY: 2000 * random.nextDouble(),
+        lastUpdated: DateTime.now().millisecondsSinceEpoch,
       ));
     }
 
@@ -34,6 +35,7 @@ class SpaceshipNetworkOperations {
           name: 'Spaceship $i',
           locationX: spaceships[i].locationX + 5.0 * random.nextDouble() * (random.nextBool() ? 1 : -1),
           locationY: spaceships[i].locationY + 5.0 * random.nextDouble() * (random.nextBool() ? 1 : -1),
+          lastUpdated: DateTime.now().millisecondsSinceEpoch,
         );
       }
 

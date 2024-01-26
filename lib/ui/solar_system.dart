@@ -24,6 +24,8 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   final networkOperations = SpaceshipNetworkOperations();
   final repository = SpaceshipRepository();
 
+  final _random = Random();
+
   late final Ticker _ticker;
 
   final TransformationController _controller = TransformationController();
@@ -122,9 +124,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
           Positioned(
             left: spaceshipX,
             top: spaceshipY,
-            child: CustomPaint(
-              painter: SpaceshipPainter(color: colors[0]),
-            ),
+            child: Image.asset('ships/ship1.png', width: 50, height: 50)
           ),
 
           // other spaceships
@@ -142,13 +142,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
                   spaceshipWidgets.add(Positioned(
                     left: ship.locationX,
                     top: ship.locationY,
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CustomPaint(
-                        painter: SpaceshipPainter(color: colors[idx % colors.length]),
-                      ),
-                    ),
+                    child: Image.asset('ships/ship${ship.shipType}.png', width: 50, height: 50)
                   ));
                 }
 
