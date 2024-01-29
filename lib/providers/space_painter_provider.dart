@@ -3,6 +3,8 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
+
 import '../models/planet_data.dart';
 
 /// This class provides the data for the SpacePainter so it can paint the space.
@@ -10,6 +12,9 @@ class SpacePainterProvider {
 
   final _starPositions = <Offset>[];
   final _random = Random();
+
+  bool starsPainted = false;
+
 
   SpacePainterProvider() {
     generateStars(300);

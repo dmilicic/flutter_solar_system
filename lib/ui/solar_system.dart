@@ -124,7 +124,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
           Positioned(
             left: spaceshipX,
             top: spaceshipY,
-            child: Image.asset('ships/ship1.png', width: 50, height: 50)
+            child: Image.asset('assets/ships/ship1.png', width: 50, height: 50)
           ),
 
           // other spaceships
@@ -142,7 +142,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
                   spaceshipWidgets.add(Positioned(
                     left: ship.locationX,
                     top: ship.locationY,
-                    child: Image.asset('ships/ship${ship.shipType}.png', width: 50, height: 50)
+                    child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50)
                   ));
                 }
 

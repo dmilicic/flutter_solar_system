@@ -22,16 +22,21 @@ class SpacePainter extends CustomPainter {
     final backgroundRect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRect(backgroundRect, provider.provideSpacePaint());
 
-    provider.provideStars().forEach((starPosition) {
-      final position = starPosition * size.width;
-      canvas.drawCircle(position, starRadius, provider.provideStarPaint());
-    });
+    paintStars(canvas, size);
 
     drawSun(canvas, size);
 
     for (var planet in planets) {
       drawOrbit(canvas, size, orbitRadius: planet.distance);
       drawPlanet(canvas, size, planet);
+    }
+  }
+
+  void paintStars(Canvas canvas, Size size) {
+    final stars = provider.provideStars();
+    for (var starPosition in stars) {
+      final position = starPosition * size.width;
+      canvas.drawCircle(position, starRadius, provider.provideStarPaint());
     }
   }
 
@@ -60,8 +65,6 @@ class SpacePainter extends CustomPainter {
       center: alignment,
       radius: 0.5, // covers the full circle
       colors: <Color>[
-        // Color(0xFFbbcd96), // inner color
-        // Color(0xFF5b7c65), // outer color
         planet.color,
         darken(planet.color),
       ],
@@ -81,7 +84,7 @@ class SpacePainter extends CustomPainter {
     canvas.drawCircle(planetPosition, planet.radius, planetPaint);
 
     // Update the angle for the next frame
-    planet.angle += 0.001; // adjust this value to change the speed of the planet
+    planet.angle += 0.0001; // adjust this value to change the speed of the planet
   }
 
   void drawOrbit(Canvas canvas, Size size, {double orbitRadius = 400.0}) {
