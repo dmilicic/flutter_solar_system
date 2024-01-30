@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:solar_system/network/spaceship_network_operations.dart';
 import 'package:solar_system/providers/space_painter_provider.dart';
 import 'package:solar_system/repository/spaceship_repository.dart';
+import 'package:solar_system/ui/painters/planet_painter.dart';
 import 'package:solar_system/ui/painters/space_painter.dart';
 import 'package:solar_system/ui/painters/spaceship_painter.dart';
 
@@ -117,6 +118,14 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             height: spaceHeight,
             child: CustomPaint(
               painter: SpacePainter(dataProvider),
+            ),
+          ),
+
+          SizedBox(
+            width: spaceWidth,
+            height: spaceHeight,
+            child: CustomPaint(
+              painter: PlanetPainter(dataProvider),
             ),
           ),
 
