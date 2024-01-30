@@ -18,7 +18,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
 
   final spaceships = <String, SpaceshipData>{}; // <id, SpaceshipData>
 
-  Future<void> registerNewSpaceship() async {
+  Future<SpaceshipData> registerNewSpaceship() async {
 
     final randomShipType = _random.nextInt(3) + 1;
 
@@ -26,20 +26,22 @@ class SpaceshipRepository implements ISpaceshipRepository {
     playerSpaceship = SpaceshipData(
       id: id,
       name: 'Spaceship 1',
-      locationX: 200.0,
-      locationY: 200.0,
+      locationX: 500.0,
+      locationY: 1000.0,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       shipType: randomShipType,
     );
 
-    await updateSpaceshipData(playerSpaceship);
+    await updateRemoteSpaceshipData(playerSpaceship);
 
     // populate our local map
     final snapshot = await _db.ref("spaceships").get();
     _updateLocalSpaceships(snapshot);
+
+    return playerSpaceship;
   }
 
-  Future<void> updateSpaceshipData(SpaceshipData spaceshipData) async {
+  Future<void> updateRemoteSpaceshipData(SpaceshipData spaceshipData) async {
     DatabaseReference ref = _db.ref("spaceships/${spaceshipData.id}");
     await ref.set({
       'id': spaceshipData.id,
@@ -78,26 +80,29 @@ class SpaceshipRepository implements ISpaceshipRepository {
     });
   }
 
-  void updateSpaceshipLocation(double spaceshipX, double spaceshipY) {
-    if (playerSpaceship != null) {
-      updateSpaceshipData(SpaceshipData(
-        id: playerSpaceship.id,
-        name: playerSpaceship.name,
-        locationX: spaceshipX,
-        locationY: spaceshipY,
-        lastUpdated: DateTime.now().millisecondsSinceEpoch,
-      ));
-    }
+  SpaceshipData updateSpaceshipLocation(double spaceshipX, double spaceshipY) {
+    final newData = SpaceshipData(
+      id: playerSpaceship.id,
+      name: playerSpaceship.name,
+      locationX: spaceshipX,
+      locationY: spaceshipY,
+      lastUpdated: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    updateRemoteSpaceshipData(newData);
+
+    return newData;
   }
 
   void _updateLocalSpaceships(DataSnapshot snapshot) async {
     for (var doc in snapshot.children) {
-      _updateSpaceship(doc.value as Map<String, dynamic>);
+      _updateSpaceship(doc.value as Map<Object?, Object?>);
     }
   }
 
-  void _updateSpaceship(Map<String, dynamic> data) {
-    final spaceship = SpaceshipData.fromJson(data);
+  void _updateSpaceship(Map<Object?, Object?> data) {
+    final spaceshipData = data.map((key, value) => MapEntry(key.toString(), value));
+    final spaceship = SpaceshipData.fromJson(spaceshipData);
     spaceships[spaceship.id] = spaceship;
   }
 

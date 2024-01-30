@@ -8,7 +8,6 @@ import 'package:solar_system/providers/space_painter_provider.dart';
 import 'package:solar_system/repository/spaceship_repository.dart';
 import 'package:solar_system/ui/painters/planet_painter.dart';
 import 'package:solar_system/ui/painters/space_painter.dart';
-import 'package:solar_system/ui/painters/spaceship_painter.dart';
 
 import '../models/spaceship_data.dart';
 
@@ -25,8 +24,6 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   final networkOperations = SpaceshipNetworkOperations();
   final repository = SpaceshipRepository();
 
-  final _random = Random();
-
   late final Ticker _ticker;
 
   final TransformationController _controller = TransformationController();
@@ -36,26 +33,10 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   final spaceWidth = 2000.0;
   final spaceHeight = 2000.0;
 
-  double spaceshipX = 1000.0;
-  double spaceshipY = 500.0;
-
   double _elapsed = 0.0;
 
-  final colors = <Color>[
-    const Color(0xFFff834b),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-    getRandomColor(),
-  ];
+  SpaceshipData? playerSpaceship;
+  SpaceshipData? prevSpaceshipData;
 
   @override
   void initState() {
@@ -64,6 +45,9 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
     _ticker = createTicker((elapsed) {
 
       setState(() {}); // trigger a repaint
+
+      var spaceshipY = playerSpaceship?.locationY ?? 0.0;
+      var spaceshipX = playerSpaceship?.locationX ?? 0.0;
 
       if (_currentKeysPressed.isNotEmpty) {
         if (_currentKeysPressed.contains(LogicalKeyboardKey.arrowUp)) {
@@ -84,17 +68,38 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
       final elapsedMillis = elapsed.inMilliseconds.toDouble();
       if(elapsedMillis - _elapsed > 10) {
         _elapsed = elapsedMillis;
-        repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
+        playerSpaceship = repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
+
+        playerSpaceship = prevSpaceshipData != null ?
+        playerSpaceship?.copyWith(orientation: playerSpaceship?.determineOrientation(prevSpaceshipData) ?? 0.0) :
+        playerSpaceship;
+
+        prevSpaceshipData = playerSpaceship;
       }
     });
 
     _ticker.start();
 
-    repository.registerNewSpaceship();
+    repository.registerNewSpaceship()
+        .then((value) {
+          playerSpaceship = value;
+          prevSpaceshipData = value;
+        });
   }
 
   @override
   Widget build(BuildContext context) {
+
+    Widget playerSpaceshipWidget = playerSpaceship == null
+        ? Container()
+        : Positioned(
+          left: playerSpaceship!.locationX,
+          top: playerSpaceship!.locationY,
+          child: Transform.rotate(
+              angle: playerSpaceship!.orientation,
+              child: Image.asset('assets/ships/ship1.png', width: 50, height: 50)
+          ),
+        );
 
     return RawKeyboardListener(
       focusNode: _focusNode,
@@ -129,12 +134,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             ),
           ),
 
-          // player spaceship
-          Positioned(
-            left: spaceshipX,
-            top: spaceshipY,
-            child: Image.asset('assets/ships/ship1.png', width: 50, height: 50)
-          ),
+          playerSpaceshipWidget,
 
           // other spaceships
           StreamBuilder(
@@ -151,7 +151,10 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
                   spaceshipWidgets.add(Positioned(
                     left: ship.locationX,
                     top: ship.locationY,
-                    child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50)
+                    child: Transform.rotate(
+                        angle: ship.orientation,
+                        child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50)
+                    )
                   ));
                 }
 
