@@ -19,18 +19,15 @@ class SpaceshipData {
     this.orientation = 0.0,
   });
 
-  /// Determine the orientation of the spaceship based on the previous location.
-  double determineOrientation(SpaceshipData? prev) {
-    if (prev == null) {
-      return 0.0;
+  /// Determine the orientation of the spaceship based on the new location.
+  double determineOrientation(double newX, double newY) {
+
+    if (newX == locationX && newY == locationY) {
+      return orientation;
     }
 
-    if (prev.locationX == locationX && prev.locationY == locationY) {
-      return prev.orientation;
-    }
-
-    final dx = locationX - prev.locationX;
-    final dy = locationY - prev.locationY;
+    final dx = newX - locationX;
+    final dy = newY - locationY;
 
     if (dx == 0.0) {
       if (dy > 0.0) {
@@ -75,6 +72,7 @@ class SpaceshipData {
       'locationY': locationY,
       'lastUpdated': lastUpdated,
       'shipType': shipType,
+      'orientation': orientation,
     };
   }
 
@@ -87,6 +85,7 @@ class SpaceshipData {
       locationY: (json['locationY'] as num).toDouble(),
       lastUpdated: (json['lastUpdated'] as num).toInt(),
       shipType: (json['shipType'] as num?)?.toInt() ?? 2,
+      orientation: (json['orientation'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

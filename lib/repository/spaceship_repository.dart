@@ -14,7 +14,10 @@ class SpaceshipRepository implements ISpaceshipRepository {
   final _db = FirebaseDatabase.instance;
   final _random = Random();
 
-  late SpaceshipData playerSpaceship;
+  late SpaceshipData? playerSpaceship;
+
+  final _spaceshipStreamController = StreamController<SpaceshipData>();
+  Stream<SpaceshipData> get spaceshipStream => _spaceshipStreamController.stream;
 
   final spaceships = <String, SpaceshipData>{}; // <id, SpaceshipData>
 
@@ -32,32 +35,36 @@ class SpaceshipRepository implements ISpaceshipRepository {
       shipType: randomShipType,
     );
 
-    await updateRemoteSpaceshipData(playerSpaceship);
+    await updateRemoteSpaceshipData(playerSpaceship!);
 
     // populate our local map
     final snapshot = await _db.ref("spaceships").get();
     _updateLocalSpaceships(snapshot);
 
-    return playerSpaceship;
+    return playerSpaceship!;
   }
 
   Future<void> updateRemoteSpaceshipData(SpaceshipData spaceshipData) async {
     DatabaseReference ref = _db.ref("spaceships/${spaceshipData.id}");
-    await ref.set({
-      'id': spaceshipData.id,
-      'name': spaceshipData.name,
-      'locationX': spaceshipData.locationX,
-      'locationY': spaceshipData.locationY,
-      'lastUpdated': spaceshipData.lastUpdated,
-    }).onError((error, stackTrace) {
-      if (kDebugMode) {
-        print('Failed to update spaceship data: $error');
-      }
+    await ref.set(spaceshipData.toMap())
+        .onError((error, stackTrace) {
+          if (kDebugMode) {
+            print('Failed to update spaceship data: $error');
+          }
     }).timeout(const Duration(seconds: 5), onTimeout: () {
       if (kDebugMode) {
         print('Failed to update spaceship data: timeout');
       }
     });
+  }
+
+  SpaceshipData? getPlayerSpaceship() {
+    return playerSpaceship;
+  }
+
+  @override
+  Stream<SpaceshipData> observePlayerSpaceship() {
+    return spaceshipStream;
   }
 
   @override
@@ -74,24 +81,25 @@ class SpaceshipRepository implements ISpaceshipRepository {
 
       final spaceshipsToShow = spaceships.values
           .where((element) => now - element.lastUpdated < oldThreshold * 60 * 1000)
-          .where((element) => element.id != playerSpaceship.id); // don't draw the player spaceship here
+          .where((element) => element.id != playerSpaceship?.id); // don't draw the player spaceship here
 
       return spaceshipsToShow.toList();
     });
   }
 
-  SpaceshipData updateSpaceshipLocation(double spaceshipX, double spaceshipY) {
-    final newData = SpaceshipData(
-      id: playerSpaceship.id,
-      name: playerSpaceship.name,
+  updateSpaceshipLocation(double spaceshipX, double spaceshipY) {
+    playerSpaceship = SpaceshipData(
+      id: playerSpaceship?.id ?? uuid.v4(),
+      name: playerSpaceship?.name ?? 'Spaceship 1',
       locationX: spaceshipX,
       locationY: spaceshipY,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
+      orientation: playerSpaceship?.determineOrientation(spaceshipX, spaceshipY) ?? 0.0,
     );
 
-    updateRemoteSpaceshipData(newData);
+    _spaceshipStreamController.sink.add(playerSpaceship!);
 
-    return newData;
+    updateRemoteSpaceshipData(playerSpaceship!);
   }
 
   void _updateLocalSpaceships(DataSnapshot snapshot) async {
@@ -105,5 +113,4 @@ class SpaceshipRepository implements ISpaceshipRepository {
     final spaceship = SpaceshipData.fromJson(spaceshipData);
     spaceships[spaceship.id] = spaceship;
   }
-
 }

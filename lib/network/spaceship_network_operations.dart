@@ -6,7 +6,6 @@ import '../models/spaceship_data.dart';
 class SpaceshipNetworkOperations {
 
   final _spaceshipStreamController = StreamController<List<SpaceshipData>>();
-
   Stream<List<SpaceshipData>> get spaceshipStream => _spaceshipStreamController.stream;
 
   final random = Random();

@@ -35,17 +35,17 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
   double _elapsed = 0.0;
 
-  SpaceshipData? playerSpaceship;
-  SpaceshipData? prevSpaceshipData;
-
   @override
   void initState() {
     super.initState();
+
+    repository.registerNewSpaceship();
 
     _ticker = createTicker((elapsed) {
 
       setState(() {}); // trigger a repaint
 
+      final playerSpaceship = repository.playerSpaceship;
       var spaceshipY = playerSpaceship?.locationY ?? 0.0;
       var spaceshipX = playerSpaceship?.locationX ?? 0.0;
 
@@ -68,38 +68,18 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
       final elapsedMillis = elapsed.inMilliseconds.toDouble();
       if(elapsedMillis - _elapsed > 10) {
         _elapsed = elapsedMillis;
-        playerSpaceship = repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
 
-        playerSpaceship = prevSpaceshipData != null ?
-        playerSpaceship?.copyWith(orientation: playerSpaceship?.determineOrientation(prevSpaceshipData) ?? 0.0) :
-        playerSpaceship;
-
-        prevSpaceshipData = playerSpaceship;
+        if (spaceshipX != playerSpaceship?.locationX || spaceshipY != playerSpaceship?.locationY) {
+          repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
+        }
       }
     });
 
     _ticker.start();
-
-    repository.registerNewSpaceship()
-        .then((value) {
-          playerSpaceship = value;
-          prevSpaceshipData = value;
-        });
   }
 
   @override
   Widget build(BuildContext context) {
-
-    Widget playerSpaceshipWidget = playerSpaceship == null
-        ? Container()
-        : Positioned(
-          left: playerSpaceship!.locationX,
-          top: playerSpaceship!.locationY,
-          child: Transform.rotate(
-              angle: playerSpaceship!.orientation,
-              child: Image.asset('assets/ships/ship1.png', width: 50, height: 50)
-          ),
-        );
 
     return RawKeyboardListener(
       focusNode: _focusNode,
@@ -134,7 +114,25 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
             ),
           ),
 
-          playerSpaceshipWidget,
+          StreamBuilder(
+            stream: repository.observePlayerSpaceship(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final spaceshipData = snapshot.data as SpaceshipData;
+
+                return Positioned(
+                  left: spaceshipData.locationX,
+                  top: spaceshipData.locationY,
+                  child: Transform.rotate(
+                      angle: spaceshipData.orientation,
+                      child: Image.asset('assets/ships/ship${spaceshipData.shipType}.png', width: 50, height: 50)
+                  ),
+                );
+              } else {
+                return Container();
+              }
+            },
+          ),
 
           // other spaceships
           StreamBuilder(
@@ -145,8 +143,6 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
                 var spaceshipWidgets = <Widget>[];
                 for (var ship in spaceshipData) {
-
-                  final idx = spaceshipData.indexOf(ship);
 
                   spaceshipWidgets.add(Positioned(
                     left: ship.locationX,
