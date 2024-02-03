@@ -35,6 +35,8 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
   double _elapsed = 0.0;
 
+  bool playerShipInitialized = false;
+
   @override
   void initState() {
     super.initState();
@@ -69,7 +71,8 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
       if(elapsedMillis - _elapsed > 10) {
         _elapsed = elapsedMillis;
 
-        if (spaceshipX != playerSpaceship?.locationX || spaceshipY != playerSpaceship?.locationY) {
+        if (!playerShipInitialized || spaceshipX != playerSpaceship?.locationX || spaceshipY != playerSpaceship?.locationY) {
+          playerShipInitialized = true;
           repository.updateSpaceshipLocation(spaceshipX, spaceshipY);
         }
       }

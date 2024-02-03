@@ -41,6 +41,8 @@ class SpaceshipRepository implements ISpaceshipRepository {
     final snapshot = await _db.ref("spaceships").get();
     _updateLocalSpaceships(snapshot);
 
+    _spaceshipStreamController.sink.add(playerSpaceship!);
+
     return playerSpaceship!;
   }
 
