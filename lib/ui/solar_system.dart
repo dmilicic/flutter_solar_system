@@ -41,6 +41,10 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   void initState() {
     super.initState();
 
+    _controller.value = Matrix4.identity()
+      ..scale(0.8)
+      ..translate(-spaceWidth / 4, -spaceHeight / 4);
+
     repository.registerNewSpaceship();
 
     _ticker = createTicker((elapsed) {

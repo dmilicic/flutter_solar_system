@@ -78,7 +78,7 @@ class PlanetPainter extends CustomPainter {
     canvas.drawCircle(planetPosition, planet.radius, planetPaint);
 
     // Update the angle for the next frame
-    planet.angle += 0.0001; // adjust this value to change the speed of the planet
+    planet.angle += planet.revolutionSpeed; // adjust this value to change the speed of the planet
   }
 
   void drawOrbit(Canvas canvas, Size size, {double orbitRadius = 400.0}) {

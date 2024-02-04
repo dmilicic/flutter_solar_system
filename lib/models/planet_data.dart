@@ -8,6 +8,7 @@ class PlanetData {
   final double distance;
   final double radius;
   double angle = 0.0; // angle of the planet on the orbital path in radians
+  double revolutionSpeed = 0.0001; // how much the angle changes per second
 
   PlanetData({
     this.name = "Planet",
@@ -16,6 +17,7 @@ class PlanetData {
     required this.distance,
     required this.radius,
     this.angle = 0.0,
+    this.revolutionSpeed = 0.0001,
   });
 
   factory PlanetData.fromJson(Map<String, dynamic> json) {
@@ -29,11 +31,12 @@ class PlanetData {
   }
 }
 
-final _random = Random();
+// this will make all the planets be aligned across all visiting users
+final basePlanetAngle = DateTime.now().millisecondsSinceEpoch;
 
 final planets = [
-  PlanetData(color: const Color(0xFFbbcd96), distance: 400, radius: 50, angle: _random.nextDouble() * 2 * pi),
-  PlanetData(color: const Color(0xFF92c1ff), distance: 500, radius: 25, angle: _random.nextDouble() * 2 * pi),
-  PlanetData(color: const Color(0xFFff834b), distance: 800, radius: 40, angle: _random.nextDouble() * 2 * pi),
-  PlanetData(color: const Color(0xFFc4b995), distance: 1000, radius: 15, angle: _random.nextDouble() * 2 * pi),
+  PlanetData(color: const Color(0xFFbbcd96), distance: 400, radius: 50, revolutionSpeed: 0.0003, angle: basePlanetAngle + 2 * pi / 3),
+  PlanetData(color: const Color(0xFF92c1ff), distance: 500, radius: 25, revolutionSpeed: 0.0002, angle: basePlanetAngle + 4 * pi / 3),
+  PlanetData(color: const Color(0xFFff834b), distance: 800, radius: 40, revolutionSpeed: 0.0005, angle: basePlanetAngle + 6 * pi / 3),
+  PlanetData(color: const Color(0xFFc4b995), distance: 950, radius: 15, revolutionSpeed: 0.0002, angle: basePlanetAngle + 8 * pi / 3),
 ];
