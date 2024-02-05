@@ -35,8 +35,8 @@ class PlanetData {
 final basePlanetAngle = DateTime.now().millisecondsSinceEpoch;
 
 final planets = [
-  PlanetData(color: const Color(0xFFbbcd96), distance: 400, radius: 50, revolutionSpeed: 0.0003, angle: basePlanetAngle + 2 * pi / 3),
-  PlanetData(color: const Color(0xFF92c1ff), distance: 500, radius: 25, revolutionSpeed: 0.0002, angle: basePlanetAngle + 4 * pi / 3),
-  PlanetData(color: const Color(0xFFff834b), distance: 800, radius: 40, revolutionSpeed: 0.0005, angle: basePlanetAngle + 6 * pi / 3),
-  PlanetData(color: const Color(0xFFc4b995), distance: 950, radius: 15, revolutionSpeed: 0.0002, angle: basePlanetAngle + 8 * pi / 3),
+  PlanetData(color: const Color(0xFFbbcd96), distance: 400, radius: 50, revolutionSpeed: 0.0003, angle: basePlanetAngle / 16 * 0.0003), // divided by 16 as that that is the frame rate
+  PlanetData(color: const Color(0xFF92c1ff), distance: 500, radius: 25, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
+  PlanetData(color: const Color(0xFFff834b), distance: 800, radius: 40, revolutionSpeed: 0.0004, angle: basePlanetAngle / 16 * 0.0004),
+  PlanetData(color: const Color(0xFFc4b995), distance: 950, radius: 15, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
 ];

@@ -21,10 +21,15 @@ class SpacePainter extends CustomPainter {
 
   void paintStars(Canvas canvas, Size size) {
     final stars = provider.provideStars();
+    final path = Path(); // we want to batch the circle draw calls for more performance
+
     for (var starPosition in stars) {
       final position = starPosition * size.width;
-      canvas.drawCircle(position, starRadius, provider.provideStarPaint());
+      final rect = Rect.fromCircle(center: position, radius: starRadius);
+      path.addOval(rect);
     }
+
+    canvas.drawPath(path, provider.provideStarPaint());
   }
 
   @override
