@@ -7,6 +7,7 @@ import 'package:solar_system/repository/spaceship_repository_interface.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/spaceship_data.dart';
+import '../ui/config.dart';
 
 class SpaceshipRepository implements ISpaceshipRepository {
 
@@ -29,8 +30,8 @@ class SpaceshipRepository implements ISpaceshipRepository {
     playerSpaceship = SpaceshipData(
       id: id,
       name: 'Spaceship 1',
-      locationX: 500.0,
-      locationY: 1000.0,
+      locationX: Config.spaceWidth / 2.0 - 200.0,
+      locationY: Config.spaceHeight / 2.0 - 200.0,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       shipType: randomShipType,
     );

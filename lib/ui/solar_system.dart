@@ -10,6 +10,7 @@ import 'package:solar_system/ui/painters/planet_painter.dart';
 import 'package:solar_system/ui/painters/space_painter.dart';
 
 import '../models/spaceship_data.dart';
+import 'config.dart';
 
 class SolarSystem extends StatefulWidget {
   const SolarSystem({super.key});
@@ -30,9 +31,6 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   final FocusNode _focusNode = FocusNode();
   final Set<LogicalKeyboardKey> _currentKeysPressed = {};
 
-  final spaceWidth = 2000.0;
-  final spaceHeight = 2000.0;
-
   double _elapsed = 0.0;
 
   bool playerShipInitialized = false;
@@ -41,9 +39,18 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   void initState() {
     super.initState();
 
-    _controller.value = Matrix4.identity()
-      ..scale(0.8)
-      ..translate(-spaceWidth / 4, -spaceHeight / 4);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final screenSize = MediaQuery.of(context).size;
+      const midPoint = Offset(Config.spaceWidth / 2, Config.spaceHeight / 2);
+      const initialScale = 0.5;
+
+      final initialOffset = Offset(midPoint.dx * initialScale - screenSize.width / 2, midPoint.dy * initialScale - screenSize.height / 2);
+
+      _controller.value = Matrix4.identity()
+        ..translate(-initialOffset.dx, -initialOffset.dy, 0)
+        ..scale(initialScale);
+
+    });
 
     repository.registerNewSpaceship();
 
@@ -88,13 +95,13 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
 
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: _focusNode,
       autofocus: true,
-      onKey: (RawKeyEvent event) {
-        if (event is RawKeyDownEvent) {
+      onKeyEvent: (KeyEvent event) {
+        if (event is KeyDownEvent) {
           _currentKeysPressed.add(event.logicalKey);
-        } else if (event is RawKeyUpEvent) {
+        } else if (event is KeyUpEvent) {
           _currentKeysPressed.remove(event.logicalKey);
         }
       },
@@ -106,16 +113,16 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
         minScale: 0.01,
         child: Stack(children: [
           SizedBox(
-            width: spaceWidth,
-            height: spaceHeight,
+            width: Config.spaceWidth,
+            height: Config.spaceHeight,
             child: CustomPaint(
               painter: SpacePainter(dataProvider),
             ),
           ),
 
           SizedBox(
-            width: spaceWidth,
-            height: spaceHeight,
+            width: Config.spaceWidth,
+            height: Config.spaceHeight,
             child: CustomPaint(
               painter: PlanetPainter(dataProvider),
             ),
@@ -162,8 +169,8 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
                 }
 
                 return SizedBox(
-                    width: spaceWidth,
-                    height: spaceHeight,
+                    width: Config.spaceWidth,
+                    height: Config.spaceHeight,
                     child: Stack(children: spaceshipWidgets));
               } else {
                 return Container();
