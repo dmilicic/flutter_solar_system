@@ -80,7 +80,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
 
       // filter old spaceships out
       final now = DateTime.now().millisecondsSinceEpoch;
-      const oldThreshold = 5; // in minutes
+      const oldThreshold = 60 * 24 * 2; // in minutes, 2 days
 
       final spaceshipsToShow = spaceships.values
           .where((element) => now - element.lastUpdated < oldThreshold * 60 * 1000)
