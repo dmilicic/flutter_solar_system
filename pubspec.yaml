@@ -70,6 +70,9 @@ flutter:
     - assets/ships/ship2.png
     - assets/ships/ship3.png
 
+  shaders:
+    - shaders/sun_fire.frag
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

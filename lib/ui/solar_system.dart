@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' show FragmentProgram;
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -54,7 +55,11 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
     repository.registerNewSpaceship();
 
+    _loadSunShader();
+
     _ticker = createTicker((elapsed) {
+
+      dataProvider.time = elapsed.inMilliseconds / 1000.0; // seconds, for the fire shader
 
       setState(() {}); // trigger a repaint
 
@@ -90,6 +95,11 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
     });
 
     _ticker.start();
+  }
+
+  Future<void> _loadSunShader() async {
+    final program = await FragmentProgram.fromAsset('shaders/sun_fire.frag');
+    dataProvider.sunShader = program.fragmentShader();
   }
 
   @override

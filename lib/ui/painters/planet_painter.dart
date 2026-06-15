@@ -98,16 +98,31 @@ class PlanetPainter extends CustomPainter {
     );
 
     final sunPaint = provider.provideSunPaint();
+    final fireShader = provider.sunShader;
 
-    // Create a Rect that represents the bounds of the sun
+    if (fireShader != null) {
+      // Animated GLSL fire shader. Translate so the sun's bounding box sits at
+      // the origin, then the shader's fragCoord runs 0..(2*radius) and matches
+      // the uResolution we pass in.
+      final diameter = sunRadius * 2;
+
+      // Uniforms must be set in the same order they're declared in the shader.
+      fireShader.setFloat(0, diameter); // uResolution.x
+      fireShader.setFloat(1, diameter); // uResolution.y
+      fireShader.setFloat(2, provider.time); // uTime
+
+      sunPaint.shader = fireShader;
+
+      canvas.save();
+      canvas.translate(sunPosition.dx - sunRadius, sunPosition.dy - sunRadius);
+      canvas.drawCircle(Offset(sunRadius, sunRadius), sunRadius, sunPaint);
+      canvas.restore();
+      return;
+    }
+
+    // Fallback: plain radial gradient until the shader program finishes loading.
     final rect = Rect.fromCircle(center: sunPosition, radius: sunRadius);
-
-    // Create the Shader from the gradient and the bounding square
-    final shader = sunGradient.createShader(rect);
-
-    // Set the Shader to the Paint
-    sunPaint.shader = shader;
-
+    sunPaint.shader = sunGradient.createShader(rect);
     canvas.drawCircle(sunPosition, sunRadius, sunPaint);
   }
 

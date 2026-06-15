@@ -15,6 +15,15 @@ class SpacePainterProvider {
 
   bool starsPainted = false;
 
+  /// Elapsed time in seconds, fed to the animated sun fire shader. Updated
+  /// every frame from the [Ticker] in SolarSystem.
+  double time = 0.0;
+
+  /// The compiled fragment shader used to render the sun. Null until the
+  /// async program load completes, in which case the painter falls back to a
+  /// plain gradient.
+  FragmentShader? sunShader;
+
 
   SpacePainterProvider() {
     generateStars(300);
