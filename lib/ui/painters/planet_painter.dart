@@ -12,7 +12,7 @@ class PlanetPainter extends CustomPainter {
 
   PlanetPainter(this.provider);
 
-  final sunRadius = 100.0;
+  final sunRadius = 80.0;
   final sunGradient = const RadialGradient(
     center: Alignment(0.0, 0.0),
     radius: 0.5, // covers the full circle

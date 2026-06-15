@@ -102,6 +102,29 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
     dataProvider.sunShader = program.fragmentShader();
   }
 
+  /// A ship model with its name shown underneath. Only the model rotates with
+  /// the ship's orientation; the name label stays upright and readable.
+  Widget _shipWidget(SpaceshipData ship) {
+    return Positioned(
+      left: ship.locationX,
+      top: ship.locationY,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.rotate(
+            angle: ship.orientation,
+            child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            ship.name,
+            style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -144,14 +167,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
               if (snapshot.hasData) {
                 final spaceshipData = snapshot.data as SpaceshipData;
 
-                return Positioned(
-                  left: spaceshipData.locationX,
-                  top: spaceshipData.locationY,
-                  child: Transform.rotate(
-                      angle: spaceshipData.orientation,
-                      child: Image.asset('assets/ships/ship${spaceshipData.shipType}.png', width: 50, height: 50)
-                  ),
-                );
+                return _shipWidget(spaceshipData);
               } else {
                 return Container();
               }
@@ -168,14 +184,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
                 var spaceshipWidgets = <Widget>[];
                 for (var ship in spaceshipData) {
 
-                  spaceshipWidgets.add(Positioned(
-                    left: ship.locationX,
-                    top: ship.locationY,
-                    child: Transform.rotate(
-                        angle: ship.orientation,
-                        child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50)
-                    )
-                  ));
+                  spaceshipWidgets.add(_shipWidget(ship));
                 }
 
                 return SizedBox(

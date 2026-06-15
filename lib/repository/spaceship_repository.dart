@@ -15,6 +15,22 @@ class SpaceshipRepository implements ISpaceshipRepository {
   final _db = FirebaseDatabase.instance;
   final _random = Random();
 
+  // Pool of starship names. Ships are christened "SS <name>", e.g. "SS Enterprise".
+  static const _shipNames = <String>[
+    'Enterprise',
+    'Discovery',
+    'Voyager',
+    'Endeavour',
+    'Defiant',
+    'Nostromo',
+    'Serenity',
+    'Galactica',
+    'Rocinante',
+    'Normandy',
+  ];
+
+  String _randomShipName() => 'SS ${_shipNames[_random.nextInt(_shipNames.length)]}';
+
   late SpaceshipData? playerSpaceship;
 
   final _spaceshipStreamController = StreamController<SpaceshipData>();
@@ -29,7 +45,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
     final id = uuid.v4();
     playerSpaceship = SpaceshipData(
       id: id,
-      name: 'Spaceship 1',
+      name: _randomShipName(),
       locationX: Config.spaceWidth / 2.0 - 200.0,
       locationY: Config.spaceHeight / 2.0 - 200.0,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
@@ -80,7 +96,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
 
       // filter old spaceships out
       final now = DateTime.now().millisecondsSinceEpoch;
-      const oldThreshold = 60 * 24 * 2; // in minutes, 2 days
+      const oldThreshold = 5; // in minutes; hide ships idle longer than this
 
       final spaceshipsToShow = spaceships.values
           .where((element) => now - element.lastUpdated < oldThreshold * 60 * 1000)
@@ -93,7 +109,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
   updateSpaceshipLocation(double spaceshipX, double spaceshipY) {
     playerSpaceship = SpaceshipData(
       id: playerSpaceship?.id ?? uuid.v4(),
-      name: playerSpaceship?.name ?? 'Spaceship 1',
+      name: playerSpaceship?.name ?? _randomShipName(),
       locationX: spaceshipX,
       locationY: spaceshipY,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
