@@ -37,11 +37,11 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   # firebase
-  firebase_core: ^2.24.2
-  cloud_firestore: ^4.14.0
+  firebase_core: ^4.9.0
+  cloud_firestore: ^6.4.1
 
   uuid: ^3.0.5
-  firebase_database: ^10.4.0
+  firebase_database: ^12.4.1
 
 dev_dependencies:
   flutter_test:

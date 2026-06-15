@@ -12,5 +12,14 @@
     "frameworksBackend": {
       "region": "europe-west1"
     }
+  },
+  "emulators": {
+    "database": {
+      "port": 9000
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
   }
 }

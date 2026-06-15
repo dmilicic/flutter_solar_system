@@ -56,7 +56,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
           }
     }).timeout(const Duration(seconds: 5), onTimeout: () {
       if (kDebugMode) {
-        print('Failed to update spaceship data: timeout');
+        print('Failed to update spaceship data: timeout, ${spaceshipData.toMap()}');
       }
     });
   }
@@ -74,7 +74,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
   Stream<List<SpaceshipData>> observeSpaceships() {
     return _db.ref('spaceships').onValue.map((event) {
       if (kDebugMode) {
-        // print('spaceship added: ${event.snapshot.value}');
+        print('spaceship added: ${event.snapshot.value}');
       }
       _updateLocalSpaceships(event.snapshot);
 
