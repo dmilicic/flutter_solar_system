@@ -101,21 +101,24 @@ class PlanetPainter extends CustomPainter {
     final fireShader = provider.sunShader;
 
     if (fireShader != null) {
-      // Animated GLSL fire shader. Translate so the sun's bounding box sits at
-      // the origin, then the shader's fragCoord runs 0..(2*radius) and matches
-      // the uResolution we pass in.
-      final diameter = sunRadius * 2;
+      // Animated GLSL sun shader. The star's corona and rays extend well beyond
+      // the body, so we render into a square box larger than the sun and let the
+      // shader's luminance-based alpha keep the empty corners transparent.
+      // (In this shader the bright body fills ~0.71 of the box height, so a box
+      // of ~2.8x the radius reproduces the old sun size; 4x leaves room for rays.)
+      const coronaScale = 4.0;
+      final box = sunRadius * coronaScale;
 
       // Uniforms must be set in the same order they're declared in the shader.
-      fireShader.setFloat(0, diameter); // uResolution.x
-      fireShader.setFloat(1, diameter); // uResolution.y
+      fireShader.setFloat(0, box); // uResolution.x
+      fireShader.setFloat(1, box); // uResolution.y
       fireShader.setFloat(2, provider.time); // uTime
 
       sunPaint.shader = fireShader;
 
       canvas.save();
-      canvas.translate(sunPosition.dx - sunRadius, sunPosition.dy - sunRadius);
-      canvas.drawCircle(Offset(sunRadius, sunRadius), sunRadius, sunPaint);
+      canvas.translate(sunPosition.dx - box / 2, sunPosition.dy - box / 2);
+      canvas.drawRect(Rect.fromLTWH(0, 0, box, box), sunPaint);
       canvas.restore();
       return;
     }

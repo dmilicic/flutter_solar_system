@@ -98,7 +98,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   }
 
   Future<void> _loadSunShader() async {
-    final program = await FragmentProgram.fromAsset('shaders/sun_fire.frag');
+    final program = await FragmentProgram.fromAsset('shaders/sun_realistic.frag');
     dataProvider.sunShader = program.fragmentShader();
   }
 

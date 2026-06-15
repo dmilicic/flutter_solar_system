@@ -72,6 +72,7 @@ flutter:
 
   shaders:
     - shaders/sun_fire.frag
+    - shaders/sun_realistic.frag
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
