@@ -73,6 +73,10 @@ flutter:
   shaders:
     - shaders/sun_fire.frag
     - shaders/sun_realistic.frag
+    - shaders/planet.frag
+    - shaders/planet_earth.frag
+    - shaders/planet_jupiter.frag
+    - shaders/planet_volcanic.frag
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

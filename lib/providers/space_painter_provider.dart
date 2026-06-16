@@ -24,6 +24,11 @@ class SpacePainterProvider {
   /// plain gradient.
   FragmentShader? sunShader;
 
+  /// Compiled fragment shaders for each planet type (earth, jupiter, etc.),
+  /// keyed by [PlanetType]. Empty until loaded; the painter falls back to a
+  /// radial gradient for any type not yet present.
+  final Map<PlanetType, FragmentShader> planetShaders = {};
+
 
   SpacePainterProvider() {
     generateStars(300);

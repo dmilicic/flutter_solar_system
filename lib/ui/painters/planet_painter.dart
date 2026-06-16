@@ -49,6 +49,32 @@ class PlanetPainter extends CustomPainter {
       sunPosition.dy + planet.distance * sin(planetAngle),
     );
 
+    final planetShader = provider.planetShaders[planet.type];
+    if (planetShader != null) {
+      // Render the planet as a sun-lit sphere via its type-specific shader.
+      final box = planet.radius * 2;
+
+      // Uniforms must be set in the order declared in planet.frag.
+      planetShader.setFloat(0, box); // uResolution.x
+      planetShader.setFloat(1, box); // uResolution.y
+      planetShader.setFloat(2, provider.time); // uTime
+      // Direction from the planet toward the sun in screen space (unit length).
+      planetShader.setFloat(3, -cos(planetAngle)); // uLightDir.x
+      planetShader.setFloat(4, -sin(planetAngle)); // uLightDir.y
+      planetShader.setFloat(5, planet.color.r); // uColor.r
+      planetShader.setFloat(6, planet.color.g); // uColor.g
+      planetShader.setFloat(7, planet.color.b); // uColor.b
+      planetShader.setFloat(8, planet.distance / 100.0); // uSeed (distinct per planet)
+
+      canvas.save();
+      canvas.translate(planetPosition.dx - planet.radius, planetPosition.dy - planet.radius);
+      canvas.drawRect(Rect.fromLTWH(0, 0, box, box), Paint()..shader = planetShader);
+      canvas.restore();
+
+      planet.angle += planet.revolutionSpeed;
+      return;
+    }
+
     final alignment = Alignment(
       cos(planetAngle) * planet.distance / (size.width / 2) * -1,
       sin(planetAngle) * planet.distance / (size.height / 2) * -1,

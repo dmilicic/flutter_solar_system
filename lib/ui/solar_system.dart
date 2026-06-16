@@ -10,6 +10,7 @@ import 'package:solar_system/repository/spaceship_repository.dart';
 import 'package:solar_system/ui/painters/planet_painter.dart';
 import 'package:solar_system/ui/painters/space_painter.dart';
 
+import '../models/planet_data.dart';
 import '../models/spaceship_data.dart';
 import 'config.dart';
 
@@ -100,6 +101,11 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
   Future<void> _loadSunShader() async {
     final program = await FragmentProgram.fromAsset('shaders/sun_realistic.frag');
     dataProvider.sunShader = program.fragmentShader();
+
+    for (final entry in planetShaderAssets.entries) {
+      final planetProgram = await FragmentProgram.fromAsset(entry.value);
+      dataProvider.planetShaders[entry.key] = planetProgram.fragmentShader();
+    }
   }
 
   /// A ship model with its name shown underneath. Only the model rotates with
