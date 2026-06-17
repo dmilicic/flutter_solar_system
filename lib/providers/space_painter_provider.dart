@@ -47,7 +47,7 @@ class SpacePainterProvider {
     ..style = PaintingStyle.fill;
 
   final _orbitalPathPaint = Paint()
-    ..color = const Color(0xFFaabdd6)
+    ..color = const Color(0x66aabdd6)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2.0;
 

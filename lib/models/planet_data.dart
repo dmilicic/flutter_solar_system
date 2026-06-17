@@ -47,8 +47,8 @@ class PlanetData {
 final basePlanetAngle = DateTime.now().millisecondsSinceEpoch;
 
 final planets = [
-  PlanetData(color: const Color(0xFFbbcd96), distance: 400, radius: 70, type: PlanetType.earth, revolutionSpeed: 0.0003, angle: basePlanetAngle / 16 * 0.0003), // divided by 16 as that that is the frame rate
-  PlanetData(color: const Color(0xFF92c1ff), distance: 620, radius: 120, type: PlanetType.jupiter, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
-  PlanetData(color: const Color(0xFFff834b), distance: 900, radius: 55, type: PlanetType.volcanic, revolutionSpeed: 0.0004, angle: basePlanetAngle / 16 * 0.0004),
-  PlanetData(color: const Color(0xFFc4b995), distance: 1200, radius: 150, type: PlanetType.rocky, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
+  PlanetData(color: const Color(0xFFff834b), distance: 500, radius: 55, type: PlanetType.volcanic, revolutionSpeed: 0.0004, angle: basePlanetAngle / 16 * 0.0004),
+  PlanetData(color: const Color(0xFFc4b995), distance: 800, radius: 120, type: PlanetType.rocky, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
+  PlanetData(color: const Color(0xFFbbcd96), distance: 1000, radius: 70, type: PlanetType.earth, revolutionSpeed: 0.0003, angle: basePlanetAngle / 16 * 0.0003), // divided by 16 as that that is the frame rate
+  PlanetData(color: const Color(0xFF92c1ff), distance: 1500, radius: 150, type: PlanetType.jupiter, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
 ];
