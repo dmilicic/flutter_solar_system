@@ -12,7 +12,7 @@ class PlanetPainter extends CustomPainter {
 
   PlanetPainter(this.provider);
 
-  final sunRadius = 100.0;
+  final sunRadius = 80.0;
   final sunGradient = const RadialGradient(
     center: Alignment(0.0, 0.0),
     radius: 0.5, // covers the full circle
@@ -48,6 +48,32 @@ class PlanetPainter extends CustomPainter {
       sunPosition.dx + planet.distance * cos(planetAngle),
       sunPosition.dy + planet.distance * sin(planetAngle),
     );
+
+    final planetShader = provider.planetShaders[planet.type];
+    if (planetShader != null) {
+      // Render the planet as a sun-lit sphere via its type-specific shader.
+      final box = planet.radius * 2;
+
+      // Uniforms must be set in the order declared in planet.frag.
+      planetShader.setFloat(0, box); // uResolution.x
+      planetShader.setFloat(1, box); // uResolution.y
+      planetShader.setFloat(2, provider.time); // uTime
+      // Direction from the planet toward the sun in screen space (unit length).
+      planetShader.setFloat(3, -cos(planetAngle)); // uLightDir.x
+      planetShader.setFloat(4, -sin(planetAngle)); // uLightDir.y
+      planetShader.setFloat(5, planet.color.r); // uColor.r
+      planetShader.setFloat(6, planet.color.g); // uColor.g
+      planetShader.setFloat(7, planet.color.b); // uColor.b
+      planetShader.setFloat(8, planet.distance / 100.0); // uSeed (distinct per planet)
+
+      canvas.save();
+      canvas.translate(planetPosition.dx - planet.radius, planetPosition.dy - planet.radius);
+      canvas.drawRect(Rect.fromLTWH(0, 0, box, box), Paint()..shader = planetShader);
+      canvas.restore();
+
+      planet.angle += planet.revolutionSpeed;
+      return;
+    }
 
     final alignment = Alignment(
       cos(planetAngle) * planet.distance / (size.width / 2) * -1,
@@ -98,16 +124,34 @@ class PlanetPainter extends CustomPainter {
     );
 
     final sunPaint = provider.provideSunPaint();
+    final fireShader = provider.sunShader;
 
-    // Create a Rect that represents the bounds of the sun
+    if (fireShader != null) {
+      // Animated GLSL sun shader. The star's corona and rays extend well beyond
+      // the body, so we render into a square box larger than the sun and let the
+      // shader's luminance-based alpha keep the empty corners transparent.
+      // (In this shader the bright body fills ~0.71 of the box height, so a box
+      // of ~2.8x the radius reproduces the old sun size; 4x leaves room for rays.)
+      const coronaScale = 4.0;
+      final box = sunRadius * coronaScale;
+
+      // Uniforms must be set in the same order they're declared in the shader.
+      fireShader.setFloat(0, box); // uResolution.x
+      fireShader.setFloat(1, box); // uResolution.y
+      fireShader.setFloat(2, provider.time); // uTime
+
+      sunPaint.shader = fireShader;
+
+      canvas.save();
+      canvas.translate(sunPosition.dx - box / 2, sunPosition.dy - box / 2);
+      canvas.drawRect(Rect.fromLTWH(0, 0, box, box), sunPaint);
+      canvas.restore();
+      return;
+    }
+
+    // Fallback: plain radial gradient until the shader program finishes loading.
     final rect = Rect.fromCircle(center: sunPosition, radius: sunRadius);
-
-    // Create the Shader from the gradient and the bounding square
-    final shader = sunGradient.createShader(rect);
-
-    // Set the Shader to the Paint
-    sunPaint.shader = shader;
-
+    sunPaint.shader = sunGradient.createShader(rect);
     canvas.drawCircle(sunPosition, sunRadius, sunPaint);
   }
 

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' show FragmentProgram;
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import 'package:solar_system/repository/spaceship_repository.dart';
 import 'package:solar_system/ui/painters/planet_painter.dart';
 import 'package:solar_system/ui/painters/space_painter.dart';
 
+import '../models/planet_data.dart';
 import '../models/spaceship_data.dart';
 import 'config.dart';
 
@@ -54,7 +56,11 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
     repository.registerNewSpaceship();
 
+    _loadSunShader();
+
     _ticker = createTicker((elapsed) {
+
+      dataProvider.time = elapsed.inMilliseconds / 1000.0; // seconds, for the fire shader
 
       setState(() {}); // trigger a repaint
 
@@ -90,6 +96,39 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
     });
 
     _ticker.start();
+  }
+
+  Future<void> _loadSunShader() async {
+    final program = await FragmentProgram.fromAsset('shaders/sun_realistic.frag');
+    dataProvider.sunShader = program.fragmentShader();
+
+    for (final entry in planetShaderAssets.entries) {
+      final planetProgram = await FragmentProgram.fromAsset(entry.value);
+      dataProvider.planetShaders[entry.key] = planetProgram.fragmentShader();
+    }
+  }
+
+  /// A ship model with its name shown underneath. Only the model rotates with
+  /// the ship's orientation; the name label stays upright and readable.
+  Widget _shipWidget(SpaceshipData ship) {
+    return Positioned(
+      left: ship.locationX,
+      top: ship.locationY,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.rotate(
+            angle: ship.orientation,
+            child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            ship.name,
+            style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -134,14 +173,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
               if (snapshot.hasData) {
                 final spaceshipData = snapshot.data as SpaceshipData;
 
-                return Positioned(
-                  left: spaceshipData.locationX,
-                  top: spaceshipData.locationY,
-                  child: Transform.rotate(
-                      angle: spaceshipData.orientation,
-                      child: Image.asset('assets/ships/ship${spaceshipData.shipType}.png', width: 50, height: 50)
-                  ),
-                );
+                return _shipWidget(spaceshipData);
               } else {
                 return Container();
               }
@@ -158,14 +190,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
                 var spaceshipWidgets = <Widget>[];
                 for (var ship in spaceshipData) {
 
-                  spaceshipWidgets.add(Positioned(
-                    left: ship.locationX,
-                    top: ship.locationY,
-                    child: Transform.rotate(
-                        angle: ship.orientation,
-                        child: Image.asset('assets/ships/ship${ship.shipType}.png', width: 50, height: 50)
-                    )
-                  ));
+                  spaceshipWidgets.add(_shipWidget(ship));
                 }
 
                 return SizedBox(

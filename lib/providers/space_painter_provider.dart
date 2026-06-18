@@ -15,6 +15,20 @@ class SpacePainterProvider {
 
   bool starsPainted = false;
 
+  /// Elapsed time in seconds, fed to the animated sun fire shader. Updated
+  /// every frame from the [Ticker] in SolarSystem.
+  double time = 0.0;
+
+  /// The compiled fragment shader used to render the sun. Null until the
+  /// async program load completes, in which case the painter falls back to a
+  /// plain gradient.
+  FragmentShader? sunShader;
+
+  /// Compiled fragment shaders for each planet type (earth, jupiter, etc.),
+  /// keyed by [PlanetType]. Empty until loaded; the painter falls back to a
+  /// radial gradient for any type not yet present.
+  final Map<PlanetType, FragmentShader> planetShaders = {};
+
 
   SpacePainterProvider() {
     generateStars(300);
@@ -33,7 +47,7 @@ class SpacePainterProvider {
     ..style = PaintingStyle.fill;
 
   final _orbitalPathPaint = Paint()
-    ..color = const Color(0xFFaabdd6)
+    ..color = const Color(0x66aabdd6)
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2.0;
 
