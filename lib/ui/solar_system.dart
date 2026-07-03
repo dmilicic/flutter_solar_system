@@ -130,7 +130,13 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
           const SizedBox(height: 2),
           Text(
             ship.name,
-            style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12),
+            // decoration: none avoids MaterialApp's yellow/red error underline,
+            // which shows through because there's no Material ancestor here.
+            style: const TextStyle(
+              color: Color(0xFFFFFFFF),
+              fontSize: 12,
+              decoration: TextDecoration.none,
+            ),
           ),
         ],
       ),
