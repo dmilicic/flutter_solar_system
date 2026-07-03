@@ -70,8 +70,6 @@ class PlanetPainter extends CustomPainter {
       canvas.translate(planetPosition.dx - planet.radius, planetPosition.dy - planet.radius);
       canvas.drawRect(Rect.fromLTWH(0, 0, box, box), Paint()..shader = planetShader);
       canvas.restore();
-
-      planet.angle += planet.revolutionSpeed;
       return;
     }
 
@@ -102,9 +100,6 @@ class PlanetPainter extends CustomPainter {
 
     // Draw the planet
     canvas.drawCircle(planetPosition, planet.radius, planetPaint);
-
-    // Update the angle for the next frame
-    planet.angle += planet.revolutionSpeed; // adjust this value to change the speed of the planet
   }
 
   void drawOrbit(Canvas canvas, Size size, {double orbitRadius = 400.0}) {
