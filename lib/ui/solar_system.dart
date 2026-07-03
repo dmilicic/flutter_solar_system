@@ -62,6 +62,12 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
       dataProvider.time = elapsed.inMilliseconds / 1000.0; // seconds, for the fire shader
 
+      // Position every planet from shared wall-clock time so all visitors agree.
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      for (final planet in planets) {
+        planet.angle = planet.angleAt(nowMs);
+      }
+
       setState(() {}); // trigger a repaint
 
       final playerSpaceship = repository.playerSpaceship;
@@ -124,7 +130,13 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
           const SizedBox(height: 2),
           Text(
             ship.name,
-            style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 12),
+            // decoration: none avoids MaterialApp's yellow/red error underline,
+            // which shows through because there's no Material ancestor here.
+            style: const TextStyle(
+              color: Color(0xFFFFFFFF),
+              fontSize: 12,
+              decoration: TextDecoration.none,
+            ),
           ),
         ],
       ),

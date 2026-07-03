@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 /// The visual style of a planet, selecting which fragment shader renders it.
@@ -11,6 +12,11 @@ const planetShaderAssets = <PlanetType, String>{
   PlanetType.rocky: 'shaders/planet.frag',
 };
 
+/// Fixed reference instant shared by ALL clients so everyone computes the same
+/// planet positions from their wall clock. Arbitrary, but must never change
+/// once shipped — changing it rotates the whole system for every visitor.
+const orbitEpochMs = 1700000000000; // 2023-11-14T22:13:20Z
+
 class PlanetData {
   final String name;
   final String description;
@@ -18,8 +24,17 @@ class PlanetData {
   final double distance;
   final double radius;
   final PlanetType type;
-  double angle = 0.0; // angle of the planet on the orbital path in radians
-  double revolutionSpeed = 0.0001; // how much the angle changes per second
+
+  /// Angle on the orbital path at [orbitEpochMs], in radians. Spreading this
+  /// across planets keeps them off the same ray at the epoch.
+  final double initialAngle;
+
+  /// Orbital angular velocity in radians per second.
+  final double revolutionSpeed;
+
+  /// Current angle on the orbital path, recomputed each frame from wall-clock
+  /// time via [angleAt]. Never accumulated, so it cannot drift between clients.
+  double angle = 0.0;
 
   PlanetData({
     this.name = "Planet",
@@ -28,9 +43,14 @@ class PlanetData {
     required this.distance,
     required this.radius,
     this.type = PlanetType.rocky,
-    this.angle = 0.0,
-    this.revolutionSpeed = 0.0001,
-  });
+    this.initialAngle = 0.0,
+    this.revolutionSpeed = 0.006,
+  }) : angle = initialAngle;
+
+  /// The planet's orbital angle at wall-clock time [nowMs] (ms since Unix
+  /// epoch). Pure function of absolute time, so all synced clocks agree.
+  double angleAt(int nowMs) =>
+      initialAngle + revolutionSpeed * (nowMs - orbitEpochMs) / 1000.0;
 
   factory PlanetData.fromJson(Map<String, dynamic> json) {
     return PlanetData(
@@ -43,12 +63,12 @@ class PlanetData {
   }
 }
 
-// this will make all the planets be aligned across all visiting users
-final basePlanetAngle = DateTime.now().millisecondsSinceEpoch;
-
+// Positions are derived from wall-clock time against [orbitEpochMs] (see
+// angleAt), so every visitor with a roughly-correct clock sees the same layout.
+// revolutionSpeed is radians/second; initialAngle spreads them out at the epoch.
 final planets = [
-  PlanetData(color: const Color(0xFFff834b), distance: 500, radius: 55, type: PlanetType.volcanic, revolutionSpeed: 0.0004, angle: basePlanetAngle / 16 * 0.0004),
-  PlanetData(color: const Color(0xFFc4b995), distance: 800, radius: 120, type: PlanetType.rocky, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
-  PlanetData(color: const Color(0xFFbbcd96), distance: 1000, radius: 70, type: PlanetType.earth, revolutionSpeed: 0.0003, angle: basePlanetAngle / 16 * 0.0003), // divided by 16 as that that is the frame rate
-  PlanetData(color: const Color(0xFF92c1ff), distance: 1500, radius: 150, type: PlanetType.jupiter, revolutionSpeed: 0.0002, angle: basePlanetAngle / 16 * 0.0002),
+  PlanetData(color: const Color(0xFFff834b), distance: 500, radius: 55, type: PlanetType.volcanic, revolutionSpeed: 0.024, initialAngle: 0.0),
+  PlanetData(color: const Color(0xFFc4b995), distance: 800, radius: 120, type: PlanetType.rocky, revolutionSpeed: 0.012, initialAngle: pi / 2),
+  PlanetData(color: const Color(0xFFbbcd96), distance: 1000, radius: 70, type: PlanetType.earth, revolutionSpeed: 0.018, initialAngle: pi),
+  PlanetData(color: const Color(0xFF92c1ff), distance: 1500, radius: 150, type: PlanetType.jupiter, revolutionSpeed: 0.012, initialAngle: 3 * pi / 2),
 ];
