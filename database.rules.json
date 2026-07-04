@@ -1,11 +1,18 @@
 {
   "rules": {
     "spaceships": {
-      "$spaceship_id": {
+      "$batch_id": {
         ".read": "true",
-        ".write": "true",
-        ".validate": "newData.hasChildren(['id', 'name', 'locationX', 'locationY', 'lastUpdated'])"
+        "$spaceship_id": {
+          ".write": "true",
+          ".validate": "newData.hasChildren(['id', 'name', 'locationX', 'locationY', 'lastUpdated'])"
+        }
       }
+    },
+    "currentSpaceshipBatch": {
+      ".read": "true",
+      ".write": "true",
+      ".validate": "newData.hasChildren(['index', 'count'])"
     }
   }
 }

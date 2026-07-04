@@ -29,6 +29,13 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
   late final Ticker _ticker;
 
+  // Captured once so the StreamBuilders below keep the same subscription
+  // across every rebuild; the ticker calls setState() every frame, and
+  // re-invoking repository.observeSpaceships() in build() would otherwise
+  // tear down and recreate the Firebase listener 60 times a second.
+  late final Stream<SpaceshipData> _playerSpaceshipStream;
+  late final Stream<List<SpaceshipData>> _otherSpaceshipsStream;
+
   final TransformationController _controller = TransformationController();
   final FocusNode _focusNode = FocusNode();
   final Set<LogicalKeyboardKey> _currentKeysPressed = {};
@@ -55,6 +62,8 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
     });
 
     repository.registerNewSpaceship();
+    _playerSpaceshipStream = repository.observePlayerSpaceship();
+    _otherSpaceshipsStream = repository.observeSpaceships();
 
     _loadSunShader();
 
@@ -168,7 +177,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
           ),
 
           StreamBuilder(
-            stream: repository.observePlayerSpaceship(),
+            stream: _playerSpaceshipStream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final spaceshipData = snapshot.data as SpaceshipData;
@@ -182,7 +191,7 @@ class _SolarSystemState extends State<SolarSystem> with SingleTickerProviderStat
 
           // other spaceships
           StreamBuilder(
-            stream: repository.observeSpaceships(),
+            stream: _otherSpaceshipsStream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final spaceshipData = snapshot.data as List<SpaceshipData>;

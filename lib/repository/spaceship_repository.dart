@@ -11,6 +11,11 @@ import '../ui/config.dart';
 
 class SpaceshipRepository implements ISpaceshipRepository {
 
+  // Ships are grouped into batches of this size so each client only streams
+  // one batch's worth of positions, no matter how many visitors are on the
+  // site. Once a batch reaches capacity, the next visitor starts a new one.
+  static const _batchCapacity = 10;
+
   final uuid = const Uuid();
   final _db = FirebaseDatabase.instance;
   final _random = Random();
@@ -27,11 +32,27 @@ class SpaceshipRepository implements ISpaceshipRepository {
     'Galactica',
     'Rocinante',
     'Normandy',
+    'Sulaco',
+    'Prometheus',
+    'Andromeda',
+    'Icarus',
+    'Bebop',
+    'Nautilus',
+    'Excelsior',
+    'Yamato',
+    'Executor',
+    'Nebuchadnezzar',
   ];
 
   String _randomShipName() => 'SS ${_shipNames[_random.nextInt(_shipNames.length)]}';
 
   late SpaceshipData? playerSpaceship;
+
+  // The batch this session's ship was assigned to. Stored as a Future (rather
+  // than awaited immediately) so that registerNewSpaceship can hand out the
+  // in-flight assignment to any update that arrives before it resolves,
+  // instead of each caller racing its own transaction.
+  Future<int>? _batchIdFuture;
 
   final _spaceshipStreamController = StreamController<SpaceshipData>();
   Stream<SpaceshipData> get spaceshipStream => _spaceshipStreamController.stream;
@@ -52,10 +73,18 @@ class SpaceshipRepository implements ISpaceshipRepository {
       shipType: randomShipType,
     );
 
+    _batchIdFuture = _assignBatch();
+
     await updateRemoteSpaceshipData(playerSpaceship!);
 
+    final batchId = await _batchIdFuture!;
+
+    // Remove this ship the moment its connection drops (tab closed, browser
+    // crashed, etc.) so it doesn't linger in the batch forever.
+    await _db.ref('spaceships/$batchId/$id').onDisconnect().remove();
+
     // populate our local map
-    final snapshot = await _db.ref("spaceships").get();
+    final snapshot = await _db.ref('spaceships/$batchId').get();
     _updateLocalSpaceships(snapshot);
 
     _spaceshipStreamController.sink.add(playerSpaceship!);
@@ -63,8 +92,32 @@ class SpaceshipRepository implements ISpaceshipRepository {
     return playerSpaceship!;
   }
 
+  // Atomically claims a slot in the batch currently being filled, or starts a
+  // new one if it's full. Using a transaction on a single counter node keeps
+  // this race-free even when many visitors join at the same moment.
+  Future<int> _assignBatch() async {
+    final ref = _db.ref('currentSpaceshipBatch');
+    final result = await ref.runTransaction((Object? current) {
+      final data = current as Map<Object?, Object?>?;
+      final index = (data?['index'] as num?)?.toInt() ?? 0;
+      final count = (data?['count'] as num?)?.toInt() ?? 0;
+
+      final isFull = count >= _batchCapacity;
+      return Transaction.success({
+        'index': isFull ? index + 1 : index,
+        'count': isFull ? 1 : count + 1,
+      });
+    });
+
+    final committed = result.snapshot.value as Map<Object?, Object?>;
+    return (committed['index'] as num).toInt();
+  }
+
   Future<void> updateRemoteSpaceshipData(SpaceshipData spaceshipData) async {
-    DatabaseReference ref = _db.ref("spaceships/${spaceshipData.id}");
+    final batchId = await _batchIdFuture;
+    if (batchId == null) return; // batch not assigned yet; drop this update
+
+    DatabaseReference ref = _db.ref("spaceships/$batchId/${spaceshipData.id}");
     await ref.set(spaceshipData.toMap())
         .onError((error, stackTrace) {
           if (kDebugMode) {
@@ -87,8 +140,16 @@ class SpaceshipRepository implements ISpaceshipRepository {
   }
 
   @override
-  Stream<List<SpaceshipData>> observeSpaceships() {
-    return _db.ref('spaceships').onValue.map((event) {
+  Stream<List<SpaceshipData>> observeSpaceships() async* {
+    // Only ever listen to our own batch's node, so a client streams at most
+    // _batchCapacity other ships' worth of data regardless of total visitors.
+    final batchId = await _batchIdFuture;
+    if (batchId == null) {
+      yield const [];
+      return;
+    }
+
+    yield* _db.ref('spaceships/$batchId').onValue.map((event) {
       if (kDebugMode) {
         print('spaceship added: ${event.snapshot.value}');
       }
