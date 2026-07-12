@@ -174,6 +174,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
       locationX: spaceshipX,
       locationY: spaceshipY,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
+      shipType: playerSpaceship?.shipType ?? _random.nextInt(3) + 1,
       orientation: playerSpaceship?.determineOrientation(spaceshipX, spaceshipY) ?? 0.0,
     );
 
