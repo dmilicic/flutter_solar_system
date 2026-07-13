@@ -80,17 +80,30 @@ class _SolarSystemState extends State<SolarSystem>
       var spaceshipX = playerSpaceship?.locationX ?? 0.0;
 
       if (_currentKeysPressed.isNotEmpty) {
+        const speed = 10.0;
+        var dx = 0.0;
+        var dy = 0.0;
+
         if (_currentKeysPressed.contains(LogicalKeyboardKey.arrowUp)) {
-          spaceshipY -= 10.0;
+          dy -= 1.0;
         }
         if (_currentKeysPressed.contains(LogicalKeyboardKey.arrowDown)) {
-          spaceshipY += 10.0;
+          dy += 1.0;
         }
         if (_currentKeysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
-          spaceshipX -= 10.0;
+          dx -= 1.0;
         }
         if (_currentKeysPressed.contains(LogicalKeyboardKey.arrowRight)) {
-          spaceshipX += 10.0;
+          dx += 1.0;
+        }
+
+        // Normalize so diagonal movement (e.g. up+left) covers the same
+        // distance per tick as a single direction, instead of moving
+        // sqrt(2)x faster.
+        if (dx != 0.0 || dy != 0.0) {
+          final length = sqrt(dx * dx + dy * dy);
+          spaceshipX += dx / length * speed;
+          spaceshipY += dy / length * speed;
         }
       }
 

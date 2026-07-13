@@ -48,14 +48,15 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC_KA6vsQgeITS7RHC4cZ2HGq38tH01Ldw',
-    appId: '1:1072675133464:web:028c4265fd0cb512d40b6d',
-    messagingSenderId: '1072675133464',
-    projectId: 'fluttersolarsystem',
-    authDomain: 'fluttersolarsystem.firebaseapp.com',
-    storageBucket: 'fluttersolarsystem.appspot.com',
-    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app'
-  );
+      apiKey: 'AIzaSyC_KA6vsQgeITS7RHC4cZ2HGq38tH01Ldw',
+      appId: '1:1072675133464:web:028c4265fd0cb512d40b6d',
+      messagingSenderId: '1072675133464',
+      projectId: 'fluttersolarsystem',
+      authDomain: 'fluttersolarsystem.firebaseapp.com',
+      storageBucket: 'fluttersolarsystem.appspot.com',
+      databaseURL:
+          'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app',
+      measurementId: 'G-49YW5K4EKT');
 
   static const FirebaseOptions webDebug = FirebaseOptions(
       apiKey: 'AIzaSyC_KA6vsQgeITS7RHC4cZ2HGq38tH01Ldw',
@@ -64,35 +65,35 @@ class DefaultFirebaseOptions {
       projectId: 'fluttersolarsystem',
       authDomain: 'fluttersolarsystem.firebaseapp.com',
       storageBucket: 'fluttersolarsystem.appspot.com',
-      databaseURL: 'http://127.0.0.1:9000'
-  );
+      databaseURL: 'http://127.0.0.1:9000',
+      measurementId: 'G-49YW5K4EKT');
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAvCIz3K1n-cycFzQeyniIsKuUwvlWcZ0Y',
-    appId: '1:1072675133464:android:303a2427614e3f3ad40b6d',
-    messagingSenderId: '1072675133464',
-    projectId: 'fluttersolarsystem',
-    storageBucket: 'fluttersolarsystem.appspot.com',
-    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app'
-  );
+      apiKey: 'AIzaSyAvCIz3K1n-cycFzQeyniIsKuUwvlWcZ0Y',
+      appId: '1:1072675133464:android:303a2427614e3f3ad40b6d',
+      messagingSenderId: '1072675133464',
+      projectId: 'fluttersolarsystem',
+      storageBucket: 'fluttersolarsystem.appspot.com',
+      databaseURL:
+          'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app');
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyD95d88pr93KPsWn8rkAac31pqs4iWtsPI',
-    appId: '1:1072675133464:ios:aae2c99686ad2e8dd40b6d',
-    messagingSenderId: '1072675133464',
-    projectId: 'fluttersolarsystem',
-    storageBucket: 'fluttersolarsystem.appspot.com',
-    iosBundleId: 'com.dmilicic.solarsystem.solarSystem',
-    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app'
-  );
+      apiKey: 'AIzaSyD95d88pr93KPsWn8rkAac31pqs4iWtsPI',
+      appId: '1:1072675133464:ios:aae2c99686ad2e8dd40b6d',
+      messagingSenderId: '1072675133464',
+      projectId: 'fluttersolarsystem',
+      storageBucket: 'fluttersolarsystem.appspot.com',
+      iosBundleId: 'com.dmilicic.solarsystem.solarSystem',
+      databaseURL:
+          'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app');
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyD95d88pr93KPsWn8rkAac31pqs4iWtsPI',
-    appId: '1:1072675133464:ios:9e9abaaceb7b4048d40b6d',
-    messagingSenderId: '1072675133464',
-    projectId: 'fluttersolarsystem',
-    storageBucket: 'fluttersolarsystem.appspot.com',
-    iosBundleId: 'com.dmilicic.solarsystem.solarSystem.RunnerTests',
-    databaseURL: 'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app'
-  );
+      apiKey: 'AIzaSyD95d88pr93KPsWn8rkAac31pqs4iWtsPI',
+      appId: '1:1072675133464:ios:9e9abaaceb7b4048d40b6d',
+      messagingSenderId: '1072675133464',
+      projectId: 'fluttersolarsystem',
+      storageBucket: 'fluttersolarsystem.appspot.com',
+      iosBundleId: 'com.dmilicic.solarsystem.solarSystem.RunnerTests',
+      databaseURL:
+          'https://fluttersolarsystem-default-rtdb.europe-west1.firebasedatabase.app');
 }

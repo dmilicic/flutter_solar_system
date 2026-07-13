@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:solar_system/repository/spaceship_repository_interface.dart';
@@ -10,7 +11,6 @@ import '../models/spaceship_data.dart';
 import '../ui/config.dart';
 
 class SpaceshipRepository implements ISpaceshipRepository {
-
   // Ships are grouped into batches of this size so each client only streams
   // one batch's worth of positions, no matter how many visitors are on the
   // site. Once a batch reaches capacity, the next visitor starts a new one.
@@ -19,6 +19,7 @@ class SpaceshipRepository implements ISpaceshipRepository {
   final uuid = const Uuid();
   final _db = FirebaseDatabase.instance;
   final _random = Random();
+  final _analytics = FirebaseAnalytics.instance;
 
   // Pool of starship names. Ships are christened "SS <name>", e.g. "SS Enterprise".
   static const _shipNames = <String>[
@@ -44,7 +45,8 @@ class SpaceshipRepository implements ISpaceshipRepository {
     'Nebuchadnezzar',
   ];
 
-  String _randomShipName() => 'SS ${_shipNames[_random.nextInt(_shipNames.length)]}';
+  String _randomShipName() =>
+      'SS ${_shipNames[_random.nextInt(_shipNames.length)]}';
 
   late SpaceshipData? playerSpaceship;
 
@@ -55,11 +57,15 @@ class SpaceshipRepository implements ISpaceshipRepository {
   Future<int>? _batchIdFuture;
 
   final _spaceshipStreamController = StreamController<SpaceshipData>();
-  Stream<SpaceshipData> get spaceshipStream => _spaceshipStreamController.stream;
+  Stream<SpaceshipData> get spaceshipStream =>
+      _spaceshipStreamController.stream;
 
   final spaceships = <String, SpaceshipData>{}; // <id, SpaceshipData>
 
   Future<SpaceshipData> registerNewSpaceship() async {
+    // One spaceship is registered per visitor session, so this doubles as
+    // our "site visited" counter in the Analytics dashboard.
+    _analytics.logEvent(name: 'ship_spawned');
 
     final randomShipType = _random.nextInt(3) + 1;
 
@@ -118,14 +124,14 @@ class SpaceshipRepository implements ISpaceshipRepository {
     if (batchId == null) return; // batch not assigned yet; drop this update
 
     DatabaseReference ref = _db.ref("spaceships/$batchId/${spaceshipData.id}");
-    await ref.set(spaceshipData.toMap())
-        .onError((error, stackTrace) {
-          if (kDebugMode) {
-            print('Failed to update spaceship data: $error');
-          }
+    await ref.set(spaceshipData.toMap()).onError((error, stackTrace) {
+      if (kDebugMode) {
+        print('Failed to update spaceship data: $error');
+      }
     }).timeout(const Duration(seconds: 5), onTimeout: () {
       if (kDebugMode) {
-        print('Failed to update spaceship data: timeout, ${spaceshipData.toMap()}');
+        print(
+            'Failed to update spaceship data: timeout, ${spaceshipData.toMap()}');
       }
     });
   }
@@ -160,8 +166,11 @@ class SpaceshipRepository implements ISpaceshipRepository {
       const oldThreshold = 5; // in minutes; hide ships idle longer than this
 
       final spaceshipsToShow = spaceships.values
-          .where((element) => now - element.lastUpdated < oldThreshold * 60 * 1000)
-          .where((element) => element.id != playerSpaceship?.id); // don't draw the player spaceship here
+          .where(
+              (element) => now - element.lastUpdated < oldThreshold * 60 * 1000)
+          .where((element) =>
+              element.id !=
+              playerSpaceship?.id); // don't draw the player spaceship here
 
       return spaceshipsToShow.toList();
     });
@@ -175,7 +184,8 @@ class SpaceshipRepository implements ISpaceshipRepository {
       locationY: spaceshipY,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       shipType: playerSpaceship?.shipType ?? _random.nextInt(3) + 1,
-      orientation: playerSpaceship?.determineOrientation(spaceshipX, spaceshipY) ?? 0.0,
+      orientation:
+          playerSpaceship?.determineOrientation(spaceshipX, spaceshipY) ?? 0.0,
     );
 
     _spaceshipStreamController.sink.add(playerSpaceship!);
@@ -190,7 +200,8 @@ class SpaceshipRepository implements ISpaceshipRepository {
   }
 
   void _updateSpaceship(Map<Object?, Object?> data) {
-    final spaceshipData = data.map((key, value) => MapEntry(key.toString(), value));
+    final spaceshipData =
+        data.map((key, value) => MapEntry(key.toString(), value));
     final spaceship = SpaceshipData.fromJson(spaceshipData);
     spaceships[spaceship.id] = spaceship;
   }
